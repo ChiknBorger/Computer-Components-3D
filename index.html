@@ -11,49 +11,35 @@
 <!-- Google Model Viewer -->
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
-<!-- External CSS -->
-<link rel="stylesheet" href="style.css">
-
 <style>
-  /* Full page black background, hide horizontal scroll and scrollbar */
   html, body {
     height: 100%;
     margin: 0;
     background-color: #0a0a0a;
     color: #fff;
     scroll-behavior: smooth;
-    overflow-x: hidden; /* prevent horizontal scroll */
-    scrollbar-width: none; /* hide scrollbar in Firefox */
-  }
-  body::-webkit-scrollbar {
-    display: none; /* hide scrollbar in Chrome/Safari */
-  }
-
-  /* Enable vertical scroll snapping */
-  body {
-    scroll-snap-type: y mandatory;
+    overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
   }
 
   section {
     width: 100%;
-    scroll-snap-align: start;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
-  /* Landing section */
   #landing {
     height: 100vh;
     text-align: center;
     flex-direction: column;
   }
 
-  /* Scroll arrow animation */
   .scroll-arrow {
     font-size: 2rem;
     animation: bounce 1.5s infinite;
     margin-top: 1rem;
+    cursor: pointer;
   }
 
   @keyframes bounce {
@@ -62,20 +48,22 @@
     60% { transform: translateY(5px); }
   }
 
-  /* Model section */
   #model-section {
     height: 100vh;
     flex-direction: column;
+    position: relative;
+    padding: 1rem 0;
   }
 
   #container {
     width: 90%;
-    height: 80%;
+    height: 85%;
     background-color: #1a1a1a;
     border-radius: 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
   }
 
   model-viewer {
@@ -83,6 +71,133 @@
     height: 100%;
     background-color: transparent;
     border-radius: 0.5rem;
+  }
+
+  /* Component Info Panel */
+  #component-info {
+    position: absolute;
+    left: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(30,30,30,0.95);
+    padding: 2rem;
+    border-radius: 1rem;
+    min-width: 300px;
+    max-width: 400px;
+    z-index: 10;
+    transition: opacity 0.5s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  #component-info h2 {
+    margin-top: 0;
+    color: #4fc3f7;
+    font-size: 2rem;
+    border-bottom: 2px solid #4fc3f7;
+    padding-bottom: 0.5rem;
+  }
+
+  #component-info p {
+    line-height: 1.6;
+    font-size: 1.1rem;
+    color: #e0e0e0;
+  }
+
+  .component-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30,30,30,0.8);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    backdrop-filter: blur(5px);
+  }
+
+  /* Navigation Buttons */
+  .nav-buttons {
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    z-index: 10;
+  }
+
+  .nav-button {
+    background: rgba(79, 195, 247, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  .nav-button:hover {
+    background: #29b6f6;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(79, 195, 247, 0.7);
+  }
+
+  .nav-button:active {
+    transform: scale(0.95);
+  }
+
+  /* Control hint */
+  .control-hint {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(30,30,30,0.8);
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    color: #888;
+    text-align: center;
+  }
+
+  /* Component list */
+  .component-list {
+    position: absolute;
+    left: 5%;
+    bottom: 20px;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    max-width: 300px;
+  }
+
+  .component-chip {
+    background: rgba(79, 195, 247, 0.2);
+    color: #4fc3f7;
+    border: 1px solid #4fc3f7;
+    border-radius: 1rem;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .component-chip:hover {
+    background: rgba(79, 195, 247, 0.4);
+    transform: scale(1.05);
+  }
+
+  .component-chip.active {
+    background: #4fc3f7;
+    color: #0a0a0a;
   }
 </style>
 </head>
@@ -92,29 +207,203 @@
 <section id="landing">
   <div class="landing-text">
     <h1>Explore the PC Components</h1>
-    <p>Click on each highlighted part to see what it does inside a computer.</p>
-    <div class="scroll-arrow">↓</div>
+    <p>Use trackpad in the grey area to zoom and rotate • Click buttons to navigate</p>
+    <div class="scroll-arrow" onclick="document.getElementById('model-section').scrollIntoView({ behavior: 'smooth' })">↓</div>
   </div>
 </section>
 
 <!-- 3D Model Section -->
 <section id="model-section">
+  <div id="component-info">
+    <h2>PC Components</h2>
+    <p>Use the navigation buttons or click component names below to explore each part.</p>
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="nav-buttons">
+    <button class="nav-button" onclick="navigateToComponent(currentComponentIndex - 1)" title="Previous Component">←</button>
+    <button class="nav-button" onclick="navigateToComponent(currentComponentIndex + 1)" title="Next Component">→</button>
+  </div>
+
   <div id="container">
+    <!-- The 3D model -->
     <model-viewer
       id="pc-model"
-      src="computer_components.glb"
+      src="computercomponents.glb"
       alt="3D PC Model"
       camera-controls
       auto-rotate
       shadow-intensity="0.7"
       environment-image="neutral"
-      exposure="1.5">
+      exposure="1.5"
+      camera-orbit="0deg 75deg 4m"
+      min-camera-orbit="auto auto 1.5m"
+      max-camera-orbit="auto auto 10m"
+      field-of-view="60deg"
+      interpolation-decay="100">
+
+      <!-- No hotspots for now - we'll add them when we have exact coordinates -->
+
     </model-viewer>
+  </div>
+
+  <div class="component-counter">
+    <span id="current-component">0</span> / <span id="total-components">7</span>
+  </div>
+
+  <div class="control-hint">
+    Trackpad: Zoom & Rotate in grey area<br>
+    Buttons: Navigate components
+  </div>
+
+  <div class="component-list" id="component-list">
+    <!-- Component chips will be added by JavaScript -->
   </div>
 </section>
 
-<!-- External JS -->
-<script type="module" src="script.js"></script>
+<script>
+// Global variables
+let currentComponentIndex = 0;
+
+// Define components with their camera positions
+const components = [
+    {
+        name: "Overview",
+        description: "Complete PC System - Explore all the components that make up a computer system.",
+        cameraOrbit: "0deg 75deg 4m",
+        cameraTarget: "0m 0m 0m"
+    },
+    {
+        name: "CPU",
+        description: "Central Processing Unit – the brain of the computer that executes instructions and processes data for all operations.",
+        cameraOrbit: "0deg 75deg 2m",
+        cameraTarget: "0m 0.2m 0m"
+    },
+    {
+        name: "RAM",
+        description: "Random Access Memory – temporary memory that stores data for quick access by the CPU while programs are running.",
+        cameraOrbit: "-45deg 75deg 2.2m",
+        cameraTarget: "-0.1m 0.15m 0.1m"
+    },
+    {
+        name: "GPU",
+        description: "Graphics Processing Unit – specialized processor for rendering images, videos, and 3D graphics.",
+        cameraOrbit: "45deg 75deg 2.1m",
+        cameraTarget: "0.15m 0.1m -0.1m"
+    },
+    {
+        name: "Storage",
+        description: "Hard Drive or SSD – permanent storage for operating system, programs, and all your files and data.",
+        cameraOrbit: "90deg 75deg 2.3m",
+        cameraTarget: "-0.2m 0.05m 0.15m"
+    },
+    {
+        name: "Power Supply",
+        description: "PSU – converts AC power to DC and provides stable electricity to all computer components.",
+        cameraOrbit: "-90deg 75deg 2.4m",
+        cameraTarget: "0.1m -0.1m 0.2m"
+    },
+    {
+        name: "Cooling System",
+        description: "Fans and heat sinks that dissipate heat to prevent overheating and maintain optimal performance.",
+        cameraOrbit: "180deg 75deg 2.2m",
+        cameraTarget: "0m 0.25m -0.15m"
+    }
+];
+
+// Wait for DOM to load
+document.addEventListener('DOMContentLoaded', function() {
+    const model = document.getElementById('pc-model');
+    const componentInfo = document.getElementById('component-info');
+    const currentComponentSpan = document.getElementById('current-component');
+    const totalComponentsSpan = document.getElementById('total-components');
+    const componentList = document.getElementById('component-list');
+
+    // Initialize component list chips
+    components.forEach((component, index) => {
+        const chip = document.createElement('div');
+        chip.className = 'component-chip';
+        chip.textContent = component.name;
+        chip.onclick = () => navigateToComponent(index);
+        componentList.appendChild(chip);
+    });
+
+    // Initialize
+    totalComponentsSpan.textContent = components.length;
+    updateComponentDisplay();
+
+    // Navigation function
+    window.navigateToComponent = function(index) {
+        if (index < 0 || index >= components.length) return;
+
+        currentComponentIndex = index;
+
+        // Update camera position with smooth transition
+        const component = components[currentComponentIndex];
+
+        model.cameraOrbit = component.cameraOrbit;
+        model.cameraTarget = component.cameraTarget;
+
+        // Update info panel with fade effect
+        componentInfo.style.opacity = '0';
+
+        setTimeout(() => {
+            componentInfo.innerHTML = `
+                <h2>${component.name}</h2>
+                <p>${component.description}</p>
+            `;
+            componentInfo.style.opacity = '1';
+
+            // Update counter
+            currentComponentSpan.textContent = currentComponentIndex + 1;
+
+            // Update active chip
+            document.querySelectorAll('.component-chip').forEach((chip, i) => {
+                chip.classList.toggle('active', i === currentComponentIndex);
+            });
+        }, 300);
+    }
+
+    // Update component display
+    function updateComponentDisplay() {
+        const component = components[currentComponentIndex];
+        componentInfo.innerHTML = `
+            <h2>${component.name}</h2>
+            <p>${component.description}</p>
+        `;
+        currentComponentSpan.textContent = currentComponentIndex + 1;
+
+        // Set first chip as active
+        document.querySelectorAll('.component-chip')[0].classList.add('active');
+    }
+
+    // Keyboard navigation support
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            navigateToComponent(currentComponentIndex + 1);
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            navigateToComponent(currentComponentIndex - 1);
+        }
+    });
+
+    // Smooth scroll from landing section
+    document.addEventListener('wheel', (e) => {
+        if (window.scrollY === 0 && e.deltaY > 0) {
+            e.preventDefault();
+            document.getElementById('model-section').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+    });
+
+    // Model loaded
+    model.addEventListener('load', () => {
+        console.log('Model loaded - ready to explore!');
+    });
+});
+</script>
 
 </body>
 </html>
